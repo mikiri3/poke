@@ -12,10 +12,10 @@ import PyQt5.QtCore as QtCore
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtGui import QIcon
 
-pt_list = ["オンバーン", "ユキノオー", "ブルンゲル", "エンテイ", "ドリュウズ", "バルジーナ"]
+pt_list = ["オンバーン", "ユキノオー", "ブルンゲル", "ウインディ", "ドリュウズ", "バルジーナ"]
 
 
-class ShowPoke(QWidget):
+class ShowPoke(QWidget): #お互いのPT表示と選出選択できるもの
 	def __init__(self, parent=None):
 		QWidget.__init__(self, parent=parent)
 		self.interval = 10
@@ -67,8 +67,6 @@ class ShowPoke(QWidget):
 		self.setGeometry(300, 300, 280, 170)
 		self.setWindowTitle('QLineEdit')
 		self.show()
-
-
 
 	def onChanged(self, text): #今使ってない
 
@@ -139,7 +137,7 @@ class ButtonBoxWidget(QWidget):
 
 
 
-	def setup_ui(self):
+	def setup_ui(self):#ボタン
 		#自分の選出のボタン
 		#self.choose_button1 = QPushButton(pt_list[0], parent=self)
 		self.choose_button1 = QPushButton("", parent=self)
@@ -202,8 +200,10 @@ class ButtonBoxWidget(QWidget):
 		self.opponent_button29 = QPushButton("ガルーラ", parent=self)
 		self.opponent_button30 = QPushButton("カミツルギ", parent=self)
 
+		self.edit = QLineEdit("", self)
+		self.enter_edit = QPushButton("相手パーティに追加", parent=self)
 		#self.stop_button = QPushButton("STOP", parent=self)
-		self.new_button = QPushButton("記録せず新規作成", parent=self)
+		self.reflesh_button = QPushButton("記録せず新規作成", parent=self)
 		self.record_button = QPushButton("記録して新規作成", parent=self)
 		self.quit_button = QPushButton("QUIT", parent=self)
 
@@ -256,9 +256,12 @@ class ButtonBoxWidget(QWidget):
 		layout.addWidget(self.opponent_button29, 8, 3)
 		layout.addWidget(self.opponent_button30, 8, 4)
 
-		layout.addWidget(self.new_button, 9, 2)
-		layout.addWidget(self.record_button, 9, 3)
-		layout.addWidget(self.quit_button, 9, 4)
+		layout.addWidget(self.edit, 9, 0, 1, 2)
+		layout.addWidget(self.enter_edit, 9, 2)
+		#layout.addWidget(9,1)
+		layout.addWidget(self.reflesh_button, 10, 2)
+		layout.addWidget(self.record_button, 10, 3)
+		layout.addWidget(self.quit_button, 10, 4)
 		self.setLayout(layout)
 
 	def add_name_opponent_pt(self, opponent_name):
@@ -285,11 +288,28 @@ class ButtonBoxWidget(QWidget):
 
 		self.count += 1
 
+	def reflesh(self): #記録せず新規作成する
+		self.opponent_pt1.setText("")
+		self.opponent_pt2.setText("")
+		self.opponent_pt3.setText("")
+		self.opponent_pt4.setText("")
+		self.opponent_pt5.setText("")
+		self.opponent_pt6.setText("")
+		self.count = 0
+
+	def record(self):
+		print('here')
+		#print("ウインディ")
+		#f = open('test/text.txt', 'a')
+		#for i in range(3):
+		#	f.write(self.my_chosen_list[i])
 
 	def make_my_chosen_list(self, chosen_name): #味方の選んだポケモンをリストに入れる
-		if QAbstractButton.toggled(checked):
-			self.my_chosen_list.append(chosen_name)
-			print (self.my_chosen_list)
+		self.my_chosen_list.append(chosen_name)
+		#print(self.my_chosen_list)
+		#if QAbstractButton.toggled(checked):
+		#	self.my_chosen_list.append(chosen_name)
+		#	print (self.my_chosen_list)
 
 	def make_opponent_chosen_list(self, opponent_name):
 		self.opponent_chosen_list.append(opponent_name)
@@ -297,6 +317,7 @@ class ButtonBoxWidget(QWidget):
 
 
 def main():
+  #print("ウインディ")
   app = QApplication( sys.argv )
 
   # Control outside looking
@@ -322,7 +343,7 @@ def main():
   #show_widget.show_pt(pt_list)
 
   #トグルされたときに選出リストに追加する
-  """
+
   button_box_widget.choose_button1.toggled.connect(lambda:
 		button_box_widget.make_my_chosen_list(pt_list[0]))
   button_box_widget.choose_button2.clicked.connect(lambda:
@@ -334,7 +355,7 @@ def main():
   button_box_widget.choose_button5.clicked.connect(lambda:
 		button_box_widget.make_my_chosen_list(pt_list[4]))
   button_box_widget.choose_button6.clicked.connect(lambda:
-		button_box_widget.make_my_chosen_list(pt_list[5]))"""
+		button_box_widget.make_my_chosen_list(pt_list[5]))
 
 
 
@@ -402,6 +423,15 @@ def main():
         button_box_widget.add_name_opponent_pt("ガルーラ"))
   button_box_widget.opponent_button30.clicked.connect(lambda:
         button_box_widget.add_name_opponent_pt("カミツルギ"))
+
+  button_box_widget.enter_edit.clicked.connect(lambda:
+		button_box_widget.add_name_opponent_pt(button_box_widget.edit.text()))
+
+  button_box_widget.reflesh_button.clicked.connect(lambda:
+  		button_box_widget.reflesh())
+
+  button_box_widget.record_button.clicked.connect(lambda:
+	    button_box_widget.record())
 
   button_box_widget.quit_button.clicked.connect(
         app.quit)

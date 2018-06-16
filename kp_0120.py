@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
+
 import sys
-
-#http://dorafop.my.coocan.jp/Qt/Qt107.html
-
+import codecs
+import datetime
+import csv
 from PyQt5.QtWidgets import *
 #from PyQr5.QtGui import*
 import PyQt5.QtCore as QtCore
@@ -12,7 +13,8 @@ import PyQt5.QtCore as QtCore
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtGui import QIcon
 
-pt_list = ["オンバーン", "ユキノオー", "ブルンゲル", "ウインディ", "ドリュウズ", "バルジーナ"]
+pt_list = ["Noivern", "Abomasnow", "Jellicent", "Arcanine", "Excadrill", "Mandibuzz"]
+opp_list = []
 
 
 class ShowPoke(QWidget): #お互いのPT表示と選出選択できるもの
@@ -93,37 +95,43 @@ class ShowPoke(QWidget): #お互いのPT表示と選出選択できるもの
 		#self.choose_button2 = QPushButton(opponent_name, parent=self)
 		#self.choose_button2.setIcon(QIcon("715.png"))
 
-
+	#使ってない↓
 	def add_opponent(self, opponent_name): #相手のPTを表示する
 		if self.count==0:
 			# ラベルに入力されたテキストを挿入
 			self.lbl_opponent1.setText(opponent_name)
 			# 入力されたテキストによって、ラベルの長さを調整
 			self.lbl_opponent1.adjustSize()
+			opp_list.append(opponent_name)
 		elif self.count==1:
 			self.lbl_opponent2.setText(opponent_name)
 			self.lbl_opponent2.adjustSize()
+			opp_list.append(opponent_name)
 		elif self.count==2:
 			self.lbl_opponent3.setText(opponent_name)
 			self.lbl_opponent3.adjustSize()
+			opp_list.append(opponent_name)
 		elif self.count==3:
 			self.lbl_opponent4.setText(opponent_name)
 			self.lbl_opponent4.adjustSize()
+			opp_list.append(opponent_name)
 		elif self.count==4:
 			self.lbl_opponent5.setText(opponent_name)
 			self.lbl_opponent5.adjustSize()
+			opp_list.append(opponent_name)
 		elif self.count==5:
 			self.lbl_opponent6.setText(opponent_name)
 			self.lbl_opponent6.adjustSize()
+			opp_list.append(opponent_name)
 
 		self.count += 1
 
-		"""
+
 		layout = QGridLayout()
 		layout.addWidget(self.start_button, 0, 0)
 		layout.addWidget(self.stop_button, 0, 1)
 
-		self.setLayout(layout)"""
+		self.setLayout(layout)
 
 
 
@@ -268,25 +276,33 @@ class ButtonBoxWidget(QWidget):
 		if self.count==0:
 			#選択したボタンの名前を入れる
 			self.opponent_pt1.setText(opponent_name)
+			opp_list.append(opponent_name)
 			#更新
 			#self.opponent_pt1.update()
 		elif self.count==1:
 			self.opponent_pt2.setText(opponent_name)
+			opp_list.append(opponent_name)
 			#self.opponent_pt2.update()
 		elif self.count==2:
 			self.opponent_pt3.setText(opponent_name)
+			opp_list.append(opponent_name)
 			#self.opponent_pt3.update()
 		elif self.count==3:
 			self.opponent_pt4.setText(opponent_name)
+			opp_list.append(opponent_name)
 			#self.opponent_pt4.update()
 		elif self.count==4:
 			self.opponent_pt5.setText(opponent_name)
+			opp_list.append(opponent_name)
 			#self.opponent_pt5.update()
 		elif self.count==5:
 			self.opponent_pt6.setText(opponent_name)
+			opp_list.append(opponent_name)
+			print(opp_list) #Atomだと日本語でダメ
 			#self.opponent_pt6.update()
 
 		self.count += 1
+
 
 	def reflesh(self): #記録せず新規作成する
 		self.opponent_pt1.setText("")
@@ -297,148 +313,241 @@ class ButtonBoxWidget(QWidget):
 		self.opponent_pt6.setText("")
 		self.count = 0
 
+		#トグルをはずす
+		self.choose_button1.setChecked(False)
+		self.choose_button2.setChecked(False)
+		self.choose_button3.setChecked(False)
+		self.choose_button4.setChecked(False)
+		self.choose_button5.setChecked(False)
+		self.choose_button6.setChecked(False)
+		self.opponent_pt1.setChecked(False)
+		self.opponent_pt2.setChecked(False)
+		self.opponent_pt3.setChecked(False)
+		self.opponent_pt4.setChecked(False)
+		self.opponent_pt5.setChecked(False)
+		self.opponent_pt6.setChecked(False)
+
+		self.my_chosen_list = []
+		self.opp_list = []
+
 	def record(self):
-		print('here')
 		#print("ウインディ")
-		#f = open('test/text.txt', 'a')
-		#for i in range(3):
-		#	f.write(self.my_chosen_list[i])
+
+		f = open('test/kiroku.csv', "a", newline='', encoding='utf-16')
+		data = []
+		writer = csv.writer(f, lineterminator='\n')
+		if len(self.my_chosen_list) == 3: #三匹選出しているかどうか
+			data.append(str(datetime.datetime.now()))
+			for i in range(3):
+				data.append(self.my_chosen_list[i])
+			for opponent in self.opponent_chosen_list:
+				data.append(opponent)
+			for i in range(len(opp_list)):
+				if opp_list[i] not in self.opponent_chosen_list:
+					data.append(opp_list[i])
+			print (data)
+			writer.writerows(data)
+			f.close()
+			self.reflesh()
+		else:
+			print("Please choose just 3 pokemon")#ポップしたほうがいい感じ
+
+
+		#textファイルの場合
+		f = open('test/text1.txt', 'a')
+		f.write("\n")
+		if len(self.my_chosen_list) == 3:
+			f.write(str(datetime.datetime.now()) + ",")
+			for i in range(3):
+				f.write(self.my_chosen_list[i] + ",")
+
+
+			for opponent in self.opponent_chosen_list:
+				f.write(opponent + ",")
+			for i in range(6):
+				if opp_list[i] not in self.opponent_chosen_list:
+					if i != 5:
+						f.write(opp_list[i] + ",")
+					else:
+						f.write(opp_list[i])
+			self.reflesh()
+		else:
+			#print("Please choose just 3 pokemon")#ポップしたほうがいい感じ
+
+
+	def botsu(self, checked): #つかわなかった
+		""" ボタンがトグルされたときのスロット """
+		if checked:
+			print('Checked')
+			self.my_chosen_list.append(chosen_name)
+			print(self.my_chosen_list)
+		else:
+			print('Not Checked')
+			self.my_chosen_list.remove(chosen_name)
+			print(self.my_chosen_list)
 
 	def make_my_chosen_list(self, chosen_name): #味方の選んだポケモンをリストに入れる
-		self.my_chosen_list.append(chosen_name)
-		#print(self.my_chosen_list)
+		#チュートリアル日本語まとめ[6]でよくなりそう
+		print(chosen_name)
+		if chosen_name in self.my_chosen_list:
+			self.my_chosen_list.remove(chosen_name)
+		else:
+			self.my_chosen_list.append(chosen_name)
+		print(self.my_chosen_list)
 		#if QAbstractButton.toggled(checked):
 		#	self.my_chosen_list.append(chosen_name)
 		#	print (self.my_chosen_list)
 
 	def make_opponent_chosen_list(self, opponent_name):
-		self.opponent_chosen_list.append(opponent_name)
-		print (self.opponent_chosen_list)
+		if opponent_name in self.opponent_chosen_list:
+			self.opponent_chosen_list.remove(opponent_name)
+		else:
+			self.opponent_chosen_list.append(opponent_name)
+		print(self.opponent_chosen_list)
+
 
 
 def main():
-  #print("ウインディ")
-  app = QApplication( sys.argv )
+	#sys.stdout = codecs.getwriter('utf_8')(sys.stdout)
+	#print(type("ウインディ"))
+	#list = ['Arcanine', 'yeah']
+	#print(list[0])
+	app = QApplication( sys.argv )
 
-  # Control outside looking
-  panel = QWidget()
+	# Control outside looking
+	panel = QWidget()
 
-  #show_widget = ShowPoke(parent=panel)
-  button_box_widget = ButtonBoxWidget(parent=panel)
+	#show_widget = ShowPoke(parent=panel)
+	button_box_widget = ButtonBoxWidget(parent=panel)
 
-  panel_layout = QVBoxLayout()
-  #panel_layout.addWidget(show_widget)
-  panel_layout.addWidget(button_box_widget)
-  panel.setLayout(panel_layout)
-  panel.setFixedSize(1000, 600)
+	panel_layout = QVBoxLayout()
+	#panel_layout.addWidget(show_widget)
+	panel_layout.addWidget(button_box_widget)
+	panel.setLayout(panel_layout)
+	panel.setFixedSize(1000, 600)
 
 
-  main_window = QMainWindow()
-  main_window.setWindowTitle( "kp" )
-  main_window.setCentralWidget( panel )
+	main_window = QMainWindow()
+	main_window.setWindowTitle( "kp" )
+	main_window.setCentralWidget( panel )
 
-  #自分のパーティ
-  #pt_list = ["オンバーン", "ユキノオー", "ブルンゲル", "エンテイ", "ドリュウズ", "バルジーナ"]
+	#自分のパーティ
+	#pt_list = ["オンバーン", "ユキノオー", "ブルンゲル", "エンテイ", "ドリュウズ", "バルジーナ"]
 
-  #show_widget.show_pt(pt_list)
+	#show_widget.show_pt(pt_list)
 
-  #トグルされたときに選出リストに追加する
+	#トグルされたときに選出リストに追加する
 
-  button_box_widget.choose_button1.toggled.connect(lambda:
+	#button_box_widget.choose_button1.toggled.connect(button_box_widget.make_my_chosen_list))
+		#make_my_chosen_list(pt_list[0]))
+	button_box_widget.choose_button1.toggled.connect(lambda:
 		button_box_widget.make_my_chosen_list(pt_list[0]))
-  button_box_widget.choose_button2.clicked.connect(lambda:
+	button_box_widget.choose_button2.clicked.connect(lambda:
 		button_box_widget.make_my_chosen_list(pt_list[1]))
-  button_box_widget.choose_button3.clicked.connect(lambda:
+	button_box_widget.choose_button3.clicked.connect(lambda:
 		button_box_widget.make_my_chosen_list(pt_list[2]))
-  button_box_widget.choose_button4.clicked.connect(lambda:
+	button_box_widget.choose_button4.clicked.connect(lambda:
 		button_box_widget.make_my_chosen_list(pt_list[3]))
-  button_box_widget.choose_button5.clicked.connect(lambda:
+	button_box_widget.choose_button5.clicked.connect(lambda:
 		button_box_widget.make_my_chosen_list(pt_list[4]))
-  button_box_widget.choose_button6.clicked.connect(lambda:
+	button_box_widget.choose_button6.clicked.connect(lambda:
 		button_box_widget.make_my_chosen_list(pt_list[5]))
 
+	#トグルされた時に相手の選出リストに追加する
+	button_box_widget.opponent_pt1.toggled.connect(lambda:
+		button_box_widget.make_opponent_chosen_list(opp_list[0]))
+	button_box_widget.opponent_pt2.clicked.connect(lambda:
+		button_box_widget.make_opponent_chosen_list(opp_list[1]))
+	button_box_widget.opponent_pt3.clicked.connect(lambda:
+		button_box_widget.make_opponent_chosen_list(opp_list[2]))
+	button_box_widget.opponent_pt4.clicked.connect(lambda:
+		button_box_widget.make_opponent_chosen_list(opp_list[3]))
+	button_box_widget.opponent_pt5.clicked.connect(lambda:
+		button_box_widget.make_opponent_chosen_list(opp_list[4]))
+	button_box_widget.opponent_pt6.clicked.connect(lambda:
+		button_box_widget.make_opponent_chosen_list(opp_list[5]))
 
 
-  #テキスト表示するだけの奴↓使わなそう
-  #button_box_widget.opponent_button1.clicked.connect(lambda:
-  #      show_widget.add_opponent("ミミッキュ"))
+	#テキスト表示するだけの奴↓使わなそう
+	#button_box_widget.opponent_button1.clicked.connect(lambda:
+	#      show_widget.add_opponent("ミミッキュ"))
 
-  button_box_widget.opponent_button1.clicked.connect(lambda:
-        button_box_widget.add_name_opponent_pt("ミミッキュ"))
-  button_box_widget.opponent_button2.clicked.connect(lambda:
-        button_box_widget.add_name_opponent_pt("ランドロス"))
-  button_box_widget.opponent_button3.clicked.connect(lambda:
-        button_box_widget.add_name_opponent_pt("リザードン"))
-  button_box_widget.opponent_button4.clicked.connect(lambda:
-        button_box_widget.add_name_opponent_pt("ギャラドス"))
-  button_box_widget.opponent_button5.clicked.connect(lambda:
-        button_box_widget.add_name_opponent_pt("カプ・コケコ"))
-  button_box_widget.opponent_button6.clicked.connect(lambda:
-        button_box_widget.add_name_opponent_pt("バシャーモ"))
-  button_box_widget.opponent_button7.clicked.connect(lambda:
-        button_box_widget.add_name_opponent_pt("カバルドン"))
-  button_box_widget.opponent_button8.clicked.connect(lambda:
-        button_box_widget.add_name_opponent_pt("カプ・テテフ"))
-  button_box_widget.opponent_button9.clicked.connect(lambda:
-        button_box_widget.add_name_opponent_pt("メタグロス"))
-  button_box_widget.opponent_button10.clicked.connect(lambda:
-        button_box_widget.add_name_opponent_pt("アーゴヨン"))
-  button_box_widget.opponent_button11.clicked.connect(lambda:
-        button_box_widget.add_name_opponent_pt("ゲッコウガ"))
-  button_box_widget.opponent_button12.clicked.connect(lambda:
-        button_box_widget.add_name_opponent_pt("ポリゴン２"))
-  button_box_widget.opponent_button13.clicked.connect(lambda:
-        button_box_widget.add_name_opponent_pt("レヒレ"))
-  button_box_widget.opponent_button14.clicked.connect(lambda:
-        button_box_widget.add_name_opponent_pt("レボルト"))
-  button_box_widget.opponent_button15.clicked.connect(lambda:
-        button_box_widget.add_name_opponent_pt("テッカグヤ"))
-  button_box_widget.opponent_button16.clicked.connect(lambda:
-        button_box_widget.add_name_opponent_pt("ボーマンダ"))
-  button_box_widget.opponent_button17.clicked.connect(lambda:
-        button_box_widget.add_name_opponent_pt("ギルガルド"))
-  button_box_widget.opponent_button18.clicked.connect(lambda:
-        button_box_widget.add_name_opponent_pt("ナットレイ"))
-  button_box_widget.opponent_button19.clicked.connect(lambda:
-        button_box_widget.add_name_opponent_pt("ヒードラン"))
-  button_box_widget.opponent_button20.clicked.connect(lambda:
-        button_box_widget.add_name_opponent_pt("ゲンガー"))
-  button_box_widget.opponent_button21.clicked.connect(lambda:
-        button_box_widget.add_name_opponent_pt("ルカリオ"))
-  button_box_widget.opponent_button22.clicked.connect(lambda:
-        button_box_widget.add_name_opponent_pt("キノガッサ"))
-  button_box_widget.opponent_button23.clicked.connect(lambda:
-        button_box_widget.add_name_opponent_pt("ガブリアス"))
-  button_box_widget.opponent_button24.clicked.connect(lambda:
-        button_box_widget.add_name_opponent_pt("ドリュウズ"))
-  button_box_widget.opponent_button25.clicked.connect(lambda:
-        button_box_widget.add_name_opponent_pt("クチート"))
-  button_box_widget.opponent_button26.clicked.connect(lambda:
-        button_box_widget.add_name_opponent_pt("バンギラス"))
-  button_box_widget.opponent_button27.clicked.connect(lambda:
-        button_box_widget.add_name_opponent_pt("マンムー"))
-  button_box_widget.opponent_button28.clicked.connect(lambda:
-        button_box_widget.add_name_opponent_pt("マリルリ"))
-  button_box_widget.opponent_button29.clicked.connect(lambda:
-        button_box_widget.add_name_opponent_pt("ガルーラ"))
-  button_box_widget.opponent_button30.clicked.connect(lambda:
-        button_box_widget.add_name_opponent_pt("カミツルギ"))
+	button_box_widget.opponent_button1.clicked.connect(lambda:
+	    button_box_widget.add_name_opponent_pt("ミミッキュ"))
+	button_box_widget.opponent_button2.clicked.connect(lambda:
+	    button_box_widget.add_name_opponent_pt("ランドロス"))
+	button_box_widget.opponent_button3.clicked.connect(lambda:
+	    button_box_widget.add_name_opponent_pt("リザードン"))
+	button_box_widget.opponent_button4.clicked.connect(lambda:
+	    button_box_widget.add_name_opponent_pt("ギャラドス"))
+	button_box_widget.opponent_button5.clicked.connect(lambda:
+	    button_box_widget.add_name_opponent_pt("カプ・コケコ"))
+	button_box_widget.opponent_button6.clicked.connect(lambda:
+	    button_box_widget.add_name_opponent_pt("バシャーモ"))
+	button_box_widget.opponent_button7.clicked.connect(lambda:
+	    button_box_widget.add_name_opponent_pt("カバルドン"))
+	button_box_widget.opponent_button8.clicked.connect(lambda:
+	    button_box_widget.add_name_opponent_pt("カプ・テテフ"))
+	button_box_widget.opponent_button9.clicked.connect(lambda:
+	    button_box_widget.add_name_opponent_pt("メタグロス"))
+	button_box_widget.opponent_button10.clicked.connect(lambda:
+	    button_box_widget.add_name_opponent_pt("アーゴヨン"))
+	button_box_widget.opponent_button11.clicked.connect(lambda:
+	    button_box_widget.add_name_opponent_pt("ゲッコウガ"))
+	button_box_widget.opponent_button12.clicked.connect(lambda:
+	    button_box_widget.add_name_opponent_pt("ポリゴン２"))
+	button_box_widget.opponent_button13.clicked.connect(lambda:
+	    button_box_widget.add_name_opponent_pt("レヒレ"))
+	button_box_widget.opponent_button14.clicked.connect(lambda:
+	    button_box_widget.add_name_opponent_pt("レボルト"))
+	button_box_widget.opponent_button15.clicked.connect(lambda:
+	    button_box_widget.add_name_opponent_pt("テッカグヤ"))
+	button_box_widget.opponent_button16.clicked.connect(lambda:
+	    button_box_widget.add_name_opponent_pt("ボーマンダ"))
+	button_box_widget.opponent_button17.clicked.connect(lambda:
+	    button_box_widget.add_name_opponent_pt("ギルガルド"))
+	button_box_widget.opponent_button18.clicked.connect(lambda:
+	    button_box_widget.add_name_opponent_pt("ナットレイ"))
+	button_box_widget.opponent_button19.clicked.connect(lambda:
+	    button_box_widget.add_name_opponent_pt("ヒードラン"))
+	button_box_widget.opponent_button20.clicked.connect(lambda:
+	    button_box_widget.add_name_opponent_pt("ゲンガー"))
+	button_box_widget.opponent_button21.clicked.connect(lambda:
+	    button_box_widget.add_name_opponent_pt("ルカリオ"))
+	button_box_widget.opponent_button22.clicked.connect(lambda:
+	    button_box_widget.add_name_opponent_pt("キノガッサ"))
+	button_box_widget.opponent_button23.clicked.connect(lambda:
+	    button_box_widget.add_name_opponent_pt("ガブリアス"))
+	button_box_widget.opponent_button24.clicked.connect(lambda:
+	    button_box_widget.add_name_opponent_pt("ドリュウズ"))
+	button_box_widget.opponent_button25.clicked.connect(lambda:
+	    button_box_widget.add_name_opponent_pt("クチート"))
+	button_box_widget.opponent_button26.clicked.connect(lambda:
+	    button_box_widget.add_name_opponent_pt("バンギラス"))
+	button_box_widget.opponent_button27.clicked.connect(lambda:
+	    button_box_widget.add_name_opponent_pt("マンムー"))
+	button_box_widget.opponent_button28.clicked.connect(lambda:
+	    button_box_widget.add_name_opponent_pt("マリルリ"))
+	button_box_widget.opponent_button29.clicked.connect(lambda:
+	    button_box_widget.add_name_opponent_pt("ガルーラ"))
+	button_box_widget.opponent_button30.clicked.connect(lambda:
+	    button_box_widget.add_name_opponent_pt("カミツルギ"))
 
-  button_box_widget.enter_edit.clicked.connect(lambda:
+	button_box_widget.enter_edit.clicked.connect(lambda:
 		button_box_widget.add_name_opponent_pt(button_box_widget.edit.text()))
 
-  button_box_widget.reflesh_button.clicked.connect(lambda:
-  		button_box_widget.reflesh())
+	button_box_widget.reflesh_button.clicked.connect(lambda:
+			button_box_widget.reflesh())
 
-  button_box_widget.record_button.clicked.connect(lambda:
+	button_box_widget.record_button.clicked.connect(lambda:
 	    button_box_widget.record())
 
-  button_box_widget.quit_button.clicked.connect(
-        app.quit)
+	button_box_widget.quit_button.clicked.connect(
+	    app.quit)
 
 
-  main_window.show()
-  app.exec_()
+	main_window.show()
+	app.exec_()
 
 if __name__ == "__main__":
-  main()
+	main()
